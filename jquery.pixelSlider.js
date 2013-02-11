@@ -12,6 +12,7 @@
 /* EXTEND des transitions jquery pour l'animation par défaut */
 jQuery.easing['jswing'] = jQuery.easing['swing'];
 
+
 jQuery.extend( jQuery.easing,
     {
         easeInOutQuint: function (x, t, b, c, d) {
@@ -45,6 +46,7 @@ jQuery.extend( jQuery.easing,
                 "loading_content"   		: false,				// si != false, chargement des images de slides suivants avec infos contenues en data-src et data-alt de l'élément li
                 "numerotation"      		: false,				// class / id de la zone de numérotation courante du slider
                 "multiple_elem_visible"   	: false,				// si true, force dans la mesure du possible l'affichage de plusieurs éléments du slide
+                "move_if_hide"				: false,				// si true, slide seulement si le nouvel élément li est masqué (ne fonctionne pas avec animation fade et cycle)
                 "fullscreen"				: false,				// si true, redimentionne le slider en plein écran avec adaptation des tailles d'images de chaque li en fonction de la résolution
                 "class_images_fullscreen"	: false,				// si != false, uniquement redimensionnement des images ayant cette classe (dans le cas d'un fullscreen)
                 "touch"						: false,				// si true, activation du swipe sous navigateur tactile
@@ -146,13 +148,17 @@ jQuery.extend( jQuery.easing,
                     $(options.numerotation).prepend(span_curent);
                     $(options.numerotation).append(' / '+$slides.length);
                 }
+                if(options.move_if_hide) {
+					options.cycle = false;
+                    options.end_go_to_start = true;
+				}
                 if(options.cycle && $slides.length > 20) {
                     options.cycle = false;
                 }
                 if(options.cycle) {
                     if (options.fullscreen || options.animation == 'fade' || options.loading_content) {
                         options.cycle = false;
-                        options.end_go_to_start = true;
+                        options.end_go_to_start = false;
                     }
                 }
                 if(typeof options.callback.img_ready == 'function' || options.cycle) {
@@ -170,6 +176,7 @@ jQuery.extend( jQuery.easing,
                                     methods['resizeUl'].call($this);
                                     var ul_width = $ul.width();
                                     $slides.each(function(){
+										console.log('ecriture li');
                                         var content_li = $(this).html();
                                         var value_class= $(this).attr('class');
                                         if(value_class == undefined) {
@@ -177,6 +184,7 @@ jQuery.extend( jQuery.easing,
                                         }
                                         value_class = value_class.replace('active','');
                                         $(this).removeClass('active').addClass('li_prev_clone');
+                                        console.log('ecriture li');
                                         $ul.append('<li class="'+value_class+'">'+content_li+'</li>');
                                     });
                                     var first = true;
@@ -215,10 +223,16 @@ jQuery.extend( jQuery.easing,
                         $slides.each(function(_i){
                             var $img = $(this).children('img');
                             if($img.length > 0) {
+								console.log('img');
+								console.log($img);
                                 $img.on('load',function(){
                                     tab_img_load[_i] = true;
                                     loadImg();
                                 });
+                                if($img[0].complete || $img.height() > 0) {
+									tab_img_load[_i] = true;
+                                    loadImg();
+								}
                             }
                             else {
                                 tab_img_load[_i] = true;
@@ -673,10 +687,12 @@ jQuery.extend( jQuery.easing,
                     var monLi = $ul.find('li.active');
                     var moving_right = false;
                     var moving_left = false;
-                    if(parseInt(action)) {
-                        var nb_li = $slides.length;
-                        if(options.cycle) {
+                    var nb_li = $slides.length;
+                    if(options.cycle) {
                             nb_li = nb_li / 3;
+                    }
+                    if(parseInt(action)) {
+                        if(options.cycle) {
                             if(action == 1) {
                                 var nouveauLi = $ul.find('li')[nb_li];
                             }
@@ -729,8 +745,6 @@ jQuery.extend( jQuery.easing,
                                 action_direction = 'right';
                             }
                         }
-
-
                     }
                     else {
                         var nouveauLi = $ul.find('li.next');
@@ -742,7 +756,6 @@ jQuery.extend( jQuery.easing,
                             }
                         }
                     }
-
                     if (options.loading_content && nouveauLi.attr('data-src') && nouveauLi.attr('data-src').length > 0) {
                         methods['chargementImage'].call($this,nouveauLi, action);
                         options.in_moving = false;
@@ -814,6 +827,20 @@ jQuery.extend( jQuery.easing,
                                 );
                             }
                             else {
+								if(options.move_if_hide) {
+									var margin_ul = Math.abs(parseInt($ul.css('margin-left').replace('px',''))),
+										position_nouveauLi = nouveauLi.offset(),
+										position_this = $this.offset(),
+										nouveauLi_width = nouveauLi.outerWidth(true),
+										position_right_nouveau = position_nouveauLi.left - position_this.left + nouveauLi_width;
+										console.log('('+position_right_nouveau+' - '+margin_ul+') > '+$this.width());
+									if((position_right_nouveau - margin_ul) > $this.width()) {
+										taille_decalage = nouveauLi_width;
+									}
+									else {
+										taille_decalage = 0;
+									}
+								}
                                 $ul.animate(
                                     {marginLeft : '-='+taille_decalage},
                                     options.speed, options.easing,
@@ -896,6 +923,24 @@ jQuery.extend( jQuery.easing,
                                 );
                             }
                             else {
+								if(options.move_if_hide) {
+									/*var nb_elem_avant_slide = Math.ceil(options.nb_elem_visibles / 2),
+										num_slide = parseInt(monLi.attr('data-num'));
+										if(options.nb_elem_visibles%2 == 0) {
+											nb_elem_avant_slide++;
+										}*/
+									var margin_ul = Math.abs(parseInt($ul.css('margin-left').replace('px',''))),
+										position_nouveauLi = nouveauLi.offset(),
+										position_this = $this.offset(),
+										nouveauLi_width = nouveauLi.outerWidth(true),
+										position_left_nouveau = position_nouveauLi.left - position_this.left;
+									if(position_left_nouveau < 0) {
+										taille_decalage = nouveauLi_width;
+									}
+									else {
+										taille_decalage = 0;
+									}
+								}
                                 $ul.animate(
                                     {marginLeft : '+='+taille_decalage},
                                     options.speed, options.easing,
