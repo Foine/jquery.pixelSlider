@@ -176,7 +176,6 @@ jQuery.extend( jQuery.easing,
                                     methods['resizeUl'].call($this);
                                     var ul_width = $ul.width();
                                     $slides.each(function(){
-										console.log('ecriture li');
                                         var content_li = $(this).html();
                                         var value_class= $(this).attr('class');
                                         if(value_class == undefined) {
@@ -184,7 +183,6 @@ jQuery.extend( jQuery.easing,
                                         }
                                         value_class = value_class.replace('active','');
                                         $(this).removeClass('active').addClass('li_prev_clone');
-                                        console.log('ecriture li');
                                         $ul.append('<li class="'+value_class+'">'+content_li+'</li>');
                                     });
                                     var first = true;
@@ -223,8 +221,6 @@ jQuery.extend( jQuery.easing,
                         $slides.each(function(_i){
                             var $img = $(this).children('img');
                             if($img.length > 0) {
-								console.log('img');
-								console.log($img);
                                 $img.on('load',function(){
                                     tab_img_load[_i] = true;
                                     loadImg();
@@ -833,7 +829,6 @@ jQuery.extend( jQuery.easing,
 										position_this = $this.offset(),
 										nouveauLi_width = nouveauLi.outerWidth(true),
 										position_right_nouveau = position_nouveauLi.left - position_this.left + nouveauLi_width;
-										console.log('('+position_right_nouveau+' - '+margin_ul+') > '+$this.width());
 									if((position_right_nouveau - margin_ul) > $this.width()) {
 										taille_decalage = nouveauLi_width;
 									}
@@ -853,12 +848,14 @@ jQuery.extend( jQuery.easing,
                         else {
                             if(options.end_go_to_start && $slides.length > 1){
                                 taille_decalage = monLi.outerWidth();
-                                var li_first = $ul.find('li:first').html(),
-                                    width_li = $ul.find('li:first').outerWidth(),
-                                    height_li = $ul.find('li:first').outerHeight();
-                                $ul.append('<li style="width : '+width_li+'px;height : '+height_li+'px;">'+li_first+'</li>');
-                                $ul.width(width_ul + taille_decalage);
-                                nouveauLi = $ul.find('li:first');
+                                var first_li = $ul.find('li:first');
+                                var li_first = first_li.html(),
+                                    width_li = first_li.outerWidth(),
+                                    height_li = first_li.outerHeight();
+                                var $new_li = $('<li/>').css({width:width_li, height:height_li}).html(li_first);
+                                $ul.append($new_li);
+                                methods['resizeUl'].call($this);
+                                nouveauLi = first_li;
                                 if(options.animation == 'fade') {
                                     if(!options.current_z_index) {
                                         options.current_z_index = recursive_z_index(monLi) ? recursive_z_index(monLi) : '0';
