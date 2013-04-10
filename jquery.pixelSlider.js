@@ -47,8 +47,8 @@ jQuery.extend( jQuery.easing,
                 "numerotation"      		: false,				// class / id de la zone de numérotation courante du slider
                 "multiple_elem_visible"   	: false,				// si true, force dans la mesure du possible l'affichage de plusieurs éléments du slide
                 "move_if_hide"				: false,				// si true, slide seulement si le nouvel élément li est masqué (ne fonctionne pas avec animation fade et cycle)
-                "fullscreen"				: false,				// si true, redimentionne le slider en plein écran avec adaptation des tailles d'images de chaque li en fonction de la résolution
-                "class_images_fullscreen"	: false,				// si != false, uniquement redimensionnement des images ayant cette classe (dans le cas d'un fullscreen)
+                "auto_adjust"               : false,                // si auto ajuste la taille des images de chaque li en fonction du conteneur, si background positionne le conteneur en background en plus
+                "class_auto_adjust"	        : false,				// si != false, uniquement redimensionnement des images ayant cette classe (dans le cas d'un fullscreen)
                 "touch"						: false,				// si true, activation du swipe sous navigateur tactile
                 "content_touch"				: false,				// zone de swipe pour la navigation tactile
                 "lightbox"                  : false,                // si true affiche au click sur l'image contenue dans chaque li l'image en lightbox
@@ -60,7 +60,10 @@ jQuery.extend( jQuery.easing,
                     "after_resize_ul" 	: false,					// après le recalcul de taille du ul
                     "after_animation"	: false,					// après l'animation
                     "before_animation"	: false						// avant l'animation
-                }
+                },
+                /*DEPRACATED*/
+                "fullscreen"				: false,				// auto_adjust = background
+                "class_images_fullscreen"   : false                 // class_auto_adjust = class_images_fullscreen
             };
 
             var options = $.extend(defaults, options);
@@ -69,6 +72,16 @@ jQuery.extend( jQuery.easing,
             options.timerOn	= false;
 
             return this.each(function () {
+
+                /* gestion des deprecated */
+                if(options.fullscreen) {
+                    options.auto_adjust = 'background';
+                }
+                if(options.class_images_fullscreen) {
+                    options.class_auto_adjust = options.class_images_fullscreen;
+                }
+                /* ---------------------- */
+
 
                 // Vars
                 var $this     = $(this).data('pixelSlider-options',options);
@@ -126,7 +139,10 @@ jQuery.extend( jQuery.easing,
                 //on active le premier de la liste
                 $slides.eq(0).addClass('active');
 
-                if(options.fullscreen) {
+
+
+
+                if(options.auto_adjust == 'background') {
                     var css_this = {
                         'bottom' : 0,
                         'left' : 0,
@@ -149,16 +165,16 @@ jQuery.extend( jQuery.easing,
                     $(options.numerotation).append(' / '+$slides.length);
                 }
                 if(options.move_if_hide) {
-					options.cycle = false;
+                    options.cycle = false;
                     options.end_go_to_start = true;
-				}
+                }
                 if(options.cycle && $slides.length > 20) {
                     options.cycle = false;
                 }
                 if(options.cycle) {
-                    if (options.fullscreen || options.animation == 'fade' || options.loading_content) {
+                    if (options.auto_adjust == 'background' || options.animation == 'fade' || options.loading_content) {
                         options.cycle = false;
-                        options.end_go_to_start = false;
+                        options.end_go_to_start = true;
                     }
                 }
                 if(typeof options.callback.img_ready == 'function' || options.cycle) {
@@ -202,7 +218,21 @@ jQuery.extend( jQuery.easing,
                                 }
                                 methods['lightbox'].call($this);
                                 methods['resizeUl'].call($this);
-
+                                // gestion auto_adjust
+                                if(options.auto_adjust) {
+                                    methods['resize_img_ul'].call($this,$ul.find('li:first'));
+                                }
+                                var support_touch   = ('ontouchstart' in document.documentElement);
+                                if (!support_touch) {
+                                    $(window).bind('resize',function() {
+                                        methods['reinitialise'].call($this);
+                                        methods['resizeUl'].call($this);
+                                        if(options.auto_adjust) {
+                                            methods['resize_img_ul'].call($this,$ul.find('li:first'));
+                                        }
+                                        methods['resizeUl'].call($this);
+                                    });
+                                }
                                 if (options.timer > 0) {
                                     options.timerOn = true;
                                     options.currentTimer = setTimeout(function(){
@@ -226,9 +256,9 @@ jQuery.extend( jQuery.easing,
                                     loadImg();
                                 });
                                 if($img[0].complete || $img.height() > 0) {
-									tab_img_load[_i] = true;
+                                    tab_img_load[_i] = true;
                                     loadImg();
-								}
+                                }
                             }
                             else {
                                 tab_img_load[_i] = true;
@@ -243,7 +273,11 @@ jQuery.extend( jQuery.easing,
                             var $first_img = $ul.find('li:first img');
                             $first_img.css('visibility','hidden').load(function(){
                                 //resizeImgBack();
-                                $(this).css('opacity',0).css('visibility','visible').animate({'opacity' : 1},300);
+                                $(this).css('opacity',0).css('visibility','visible').animate({'opacity' : 1},300,function(){
+                                    if(options.auto_adjust) {
+                                        methods['resize_img_ul'].call($this,$ul.find('li:first'));
+                                    }
+                                });
                             });
                             if($first_img[0].complete || $first_img.height() > 0) {
                                 $first_img.trigger("load");
@@ -252,19 +286,20 @@ jQuery.extend( jQuery.easing,
                     }
                     methods['lightbox'].call($this);
                     methods['resizeUl'].call($this);
-
-                    // gestion fullScreen
-                    if(options.fullscreen) {
+                    // gestion auto_adjust
+                    if(options.auto_adjust) {
                         methods['resize_img_ul'].call($this,$ul.find('li:first'));
-                        var support_touch   = ('ontouchstart' in document.documentElement);
-                        if (!support_touch) {
-                            $(window).resize(function(){
-                                methods['reinitialise'].call($this);
-                                methods['resizeUl'].call($this);
+                    }
+                    var support_touch   = ('ontouchstart' in document.documentElement);
+                    if (!support_touch) {
+                        $(window).bind('resize',function() {
+                            methods['reinitialise'].call($this);
+                            methods['resizeUl'].call($this);
+                            if(options.auto_adjust) {
                                 methods['resize_img_ul'].call($this,$ul.find('li:first'));
-                                methods['resizeUl'].call($this);
-                            });
-                        }
+                            }
+                            methods['resizeUl'].call($this);
+                        });
                     }
                     if (options.timer > 0) {
                         options.timerOn = true;
@@ -507,41 +542,54 @@ jQuery.extend( jQuery.easing,
         resize_img_ul : function(li_active) {
             return this.each(function() {
                 var options = $(this).data('pixelSlider-options');
-                var window_width = window.innerWidth;
-                if(!window_width) {
-                    window_width = $(window).width();
+                var parent_width = 0;
+                var parent_height = 0;
+                if(options.auto_adjust == 'background') {
+                    var window_width = window.innerWidth;
+                    if(!window_width) {
+                        window_width = $(window).width();
+                    }
+                    var window_height = window.innerHeight;
+                    if(!window_height) {
+                        window_height = $(window).height();
+                    }
+                    parent_width = window_width;
+                    parent_height = window_height;
+
                 }
-                var window_height = window.innerHeight;
-                if(!window_height) {
-                    window_height = $(window).height();
+                else {
+                    parent_width  = li_active.outerWidth();
+                    parent_height = li_active.outerHeight();
                 }
+                li_active.css('overflow','hidden');
+
                 var img_width = 0;
                 var img_height = 0;
                 var $this     = $(this);
                 var $ul       = $this.find('ul');
                 var $slides   = $ul.find('li');
                 $slides.each(function(){
-                    $(this).css('height',window_height+'px').css('width',window_width+'px');
+                    $(this).css('height',parent_height+'px').css('width',parent_width+'px');
                 });
-                if((options.class_images_fullscreen && li_active.hasClass(options.class_images_fullscreen.replace('.',''))) || !options.class_images_fullscreen) {
+                if((options.class_auto_adjust && li_active.hasClass(options.class_auto_adjust.replace('.',''))) || !options.class_auto_adjust) {
                     $_img = li_active.find('img');
                     $_img.css('width','auto').css('height','auto').css('margin-top',0).css('margin-left',0);
                     img_width = $_img.width();
                     img_height = $_img.height();
                     var rapport_img = img_width/img_height;
-                    var rapport_ecran = window_width/window_height;
+                    var rapport_ecran = parent_width/parent_height;
                     if(rapport_img > rapport_ecran) {
-                        $_img.css('height',window_height+'px').css('width','auto');
+                        $_img.css('height',parent_height+'px').css('width','auto');
                         var new_width_img = $_img.width();
 
-                        var margin_left = (new_width_img - window_width) / 2;
+                        var margin_left = (new_width_img - parent_width) / 2;
                         $_img.css('margin-left','-'+margin_left+'px');
                     }
                     else {
-                        $_img.css('width',window_width+'px').css('height','auto');
+                        $_img.css('width',parent_width+'px').css('height','auto');
                         var new_height_img = $_img.height();
 
-                        var margin_top = (new_height_img - window_height) / 2;
+                        var margin_top = (new_height_img - parent_height) / 2;
                         $_img.css('margin-top','-'+margin_top+'px');
                     }
                 }
@@ -555,7 +603,7 @@ jQuery.extend( jQuery.easing,
                 var $ul       = $this.find('ul');
                 var $slides   = $ul.find('li');
                 $('.pix_overlay, .pix_overlay_content, .pix_close_overlay, #pix_zone_overlay').remove();
-                if(options.lightbox && !options.fullscreen && !options.move_on_click) {
+                if(options.lightbox && options.auto_adjust != 'background' && !options.move_on_click) {
                     $('.pix_overlay, .pix_overlay_content, .pix_close_overlay').remove();
                     var css_zone_overlay = {
                         'height': '100%',
@@ -685,7 +733,7 @@ jQuery.extend( jQuery.easing,
                     var moving_left = false;
                     var nb_li = $slides.length;
                     if(options.cycle) {
-                            nb_li = nb_li / 3;
+                        nb_li = nb_li / 3;
                     }
                     if(parseInt(action)) {
                         if(options.cycle) {
@@ -792,7 +840,7 @@ jQuery.extend( jQuery.easing,
                         if (typeof options.callback.before_animation == 'function') {
                             options.callback.before_animation();
                         }
-                        if (options.fullscreen) {
+                        if (options.auto_adjust) {
                             methods['resize_img_ul'].call($this,nouveauLi);
                         }
                     }
@@ -823,19 +871,19 @@ jQuery.extend( jQuery.easing,
                                 );
                             }
                             else {
-								if(options.move_if_hide) {
-									var margin_ul = Math.abs(parseInt($ul.css('margin-left').replace('px',''))),
-										position_nouveauLi = nouveauLi.offset(),
-										position_this = $this.offset(),
-										nouveauLi_width = nouveauLi.outerWidth(true),
-										position_right_nouveau = position_nouveauLi.left - position_this.left + nouveauLi_width;
-									if((position_right_nouveau - margin_ul) > $this.width()) {
-										taille_decalage = nouveauLi_width;
-									}
-									else {
-										taille_decalage = 0;
-									}
-								}
+                                if(options.move_if_hide) {
+                                    var margin_ul = Math.abs(parseInt($ul.css('margin-left').replace('px',''))),
+                                        position_nouveauLi = nouveauLi.offset(),
+                                        position_this = $this.offset(),
+                                        nouveauLi_width = nouveauLi.outerWidth(true),
+                                        position_right_nouveau = position_nouveauLi.left - position_this.left + nouveauLi_width;
+                                    if((position_right_nouveau - margin_ul) > $this.width()) {
+                                        taille_decalage = nouveauLi_width;
+                                    }
+                                    else {
+                                        taille_decalage = 0;
+                                    }
+                                }
                                 $ul.animate(
                                     {marginLeft : '-='+taille_decalage},
                                     options.speed, options.easing,
@@ -852,7 +900,7 @@ jQuery.extend( jQuery.easing,
                                 var li_first = first_li.html(),
                                     width_li = first_li.outerWidth(),
                                     height_li = first_li.outerHeight();
-                                var $new_li = $('<li/>').css({width:width_li, height:height_li}).html(li_first);
+                                var $new_li = $('<li/>').css({width:width_li, height:height_li,overflow:'hidden'}).html(li_first);
                                 $ul.append($new_li);
                                 methods['resizeUl'].call($this);
                                 nouveauLi = first_li;
@@ -920,24 +968,24 @@ jQuery.extend( jQuery.easing,
                                 );
                             }
                             else {
-								if(options.move_if_hide) {
-									/*var nb_elem_avant_slide = Math.ceil(options.nb_elem_visibles / 2),
-										num_slide = parseInt(monLi.attr('data-num'));
-										if(options.nb_elem_visibles%2 == 0) {
-											nb_elem_avant_slide++;
-										}*/
-									var margin_ul = Math.abs(parseInt($ul.css('margin-left').replace('px',''))),
-										position_nouveauLi = nouveauLi.offset(),
-										position_this = $this.offset(),
-										nouveauLi_width = nouveauLi.outerWidth(true),
-										position_left_nouveau = position_nouveauLi.left - position_this.left;
-									if(position_left_nouveau < 0) {
-										taille_decalage = nouveauLi_width;
-									}
-									else {
-										taille_decalage = 0;
-									}
-								}
+                                if(options.move_if_hide) {
+                                    /*var nb_elem_avant_slide = Math.ceil(options.nb_elem_visibles / 2),
+                                     num_slide = parseInt(monLi.attr('data-num'));
+                                     if(options.nb_elem_visibles%2 == 0) {
+                                     nb_elem_avant_slide++;
+                                     }*/
+                                    var margin_ul = Math.abs(parseInt($ul.css('margin-left').replace('px',''))),
+                                        position_nouveauLi = nouveauLi.offset(),
+                                        position_this = $this.offset(),
+                                        nouveauLi_width = nouveauLi.outerWidth(true),
+                                        position_left_nouveau = position_nouveauLi.left - position_this.left;
+                                    if(position_left_nouveau < 0) {
+                                        taille_decalage = nouveauLi_width;
+                                    }
+                                    else {
+                                        taille_decalage = 0;
+                                    }
+                                }
                                 $ul.animate(
                                     {marginLeft : '+='+taille_decalage},
                                     options.speed, options.easing,
@@ -1036,11 +1084,15 @@ jQuery.extend( jQuery.easing,
             return this.each(function() {
                 var options   = $(this).data('pixelSlider-options');
                 if(options) {
-                    var $this = $(this);
+                    var $this = $(this),
+                        $ul = $this.children('ul');
                     var _speed = options.speed;
                     clearTimeout(options.currentTimer);
                     options.speed = 0;
                     methods['move_diapo'].call($(this),1);
+                    if(options.auto_adjust) {
+                        methods['resize_img_ul'].call($this,$ul.find('li:first'));
+                    }
                     options.speed = _speed;
                     if (options.timer > 0) {
                         options.timerOn = true;
