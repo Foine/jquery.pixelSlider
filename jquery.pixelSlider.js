@@ -4,12 +4,12 @@
  * Copyright: Pixel
  *
  * Pour utiliser :
- * Cibler un élément contenant une liste (ul)
- * Cibler les éléments qui serviront de bouton pour la navigation dans les options
+ * Cibler un ï¿½lï¿½ment contenant une liste (ul)
+ * Cibler les ï¿½lï¿½ments qui serviront de bouton pour la navigation dans les options
  *
  */
 
-/* EXTEND des transitions jquery pour l'animation par défaut */
+/* EXTEND des transitions jquery pour l'animation par dï¿½faut */
 jQuery.easing['jswing'] = jQuery.easing['swing'];
 
 
@@ -28,37 +28,37 @@ jQuery.extend( jQuery.easing,
 
             // Defaults
             var defaults = {
-                "speed"						: 1100,					// vitesse de défilement
+                "speed"						: 1100,					// vitesse de dï¿½filement
                 "end_go_to_start"			: false,				// lecture en boucle du slider
                 "cycle"                     : false,                // lecture en boucle multi-elements , plus lourde que le end_go_to_start et incompatible avec fullscreen et animation type fade
                 "next_button" 				: '.pixelSlider_next',	// class / id du lien diapo suivant
-                "prev_button" 				: '.pixelSlider_prev',	// class / id du lien diapo précédent
-                "move_on_click"				: true,					// activation du slide au clic sur les éléments suivants
+                "prev_button" 				: '.pixelSlider_prev',	// class / id du lien diapo prï¿½cï¿½dent
+                "move_on_click"				: true,					// activation du slide au clic sur les ï¿½lï¿½ments suivants
                 "apply_min_css"     		: false,				// mise en place d'un css minimum
                 "css_this"          		: '',					// application du css sur l'objet courant
                 "css_ul"            		: '',					// application du css sur l'ul
                 "css_li"            		: '',					//application du css sur les li
                 "animation"					: 'slide',				// type d'animation (slide / fade)
                 "easing"            		: 'easeInOutQuint',		// type de translation (easeInOutQuint | easing)
-                "loader"            		: false,				// class / id du loader à afficher au chargement d'image
-                "hide_arrow"				: false,				// masquage des flèches de navigation en début ou fin de slider
-                "timer"						: 0,					// si > 0, défilement automatique activé avec timer = temps (en ms) d'affichage de chaque slide
-                "loading_content"   		: false,				// si != false, chargement des images de slides suivants avec infos contenues en data-src et data-alt de l'élément li
-                "numerotation"      		: false,				// class / id de la zone de numérotation courante du slider
-                "multiple_elem_visible"   	: false,				// si true, force dans la mesure du possible l'affichage de plusieurs éléments du slide
-                "move_if_hide"				: false,				// si true, slide seulement si le nouvel élément li est masqué (ne fonctionne pas avec animation fade et cycle)
+                "loader"            		: false,				// class / id du loader ï¿½ afficher au chargement d'image
+                "hide_arrow"				: false,				// masquage des flï¿½ches de navigation en dï¿½but ou fin de slider
+                "timer"						: 0,					// si > 0, dï¿½filement automatique activï¿½ avec timer = temps (en ms) d'affichage de chaque slide
+                "loading_content"   		: false,				// si != false, chargement des images de slides suivants avec infos contenues en data-src et data-alt de l'ï¿½lï¿½ment li
+                "numerotation"      		: false,				// class / id de la zone de numï¿½rotation courante du slider
+                "multiple_elem_visible"   	: false,				// si true, force dans la mesure du possible l'affichage de plusieurs ï¿½lï¿½ments du slide
+                "move_if_hide"				: false,				// si true, slide seulement si le nouvel ï¿½lï¿½ment li est masquï¿½ (ne fonctionne pas avec animation fade et cycle)
                 "auto_adjust"               : false,                // si auto ajuste la taille des images de chaque li en fonction du conteneur, si background positionne le conteneur en background en plus
                 "class_auto_adjust"	        : false,				// si != false, uniquement redimensionnement des images ayant cette classe (dans le cas d'un fullscreen)
                 "touch"						: false,				// si true, activation du swipe sous navigateur tactile
                 "content_touch"				: false,				// zone de swipe pour la navigation tactile
                 "lightbox"                  : false,                // si true affiche au click sur l'image contenue dans chaque li l'image en lightbox
-                "lightbox_click"            : false,                // class du lien présent dans le li premettant l'affichage de la lightbox
+                "lightbox_click"            : false,                // class du lien prï¿½sent dans le li premettant l'affichage de la lightbox
                 "lightbox_color"            : 'white',              // couleur de fond des lightbox : white ou black
-                "callback"          : {								// appel de fonctions spécifiques :
-                    "img_ready"   	    : false,					// après le chargement des images du slider (en mode cycle)
-                    "after_loading"   	: false,					// après le chargement de l'image suivante / avant l'animation
-                    "after_resize_ul" 	: false,					// après le recalcul de taille du ul
-                    "after_animation"	: false,					// après l'animation
+                "callback"          : {								// appel de fonctions spï¿½cifiques :
+                    "img_ready"   	    : false,					// aprï¿½s le chargement des images du slider (en mode cycle)
+                    "after_loading"   	: false,					// aprï¿½s le chargement de l'image suivante / avant l'animation
+                    "after_resize_ul" 	: false,					// aprï¿½s le recalcul de taille du ul
+                    "after_animation"	: false,					// aprï¿½s l'animation
                     "before_animation"	: false						// avant l'animation
                 },
                 /*DEPRACATED*/
@@ -179,16 +179,16 @@ jQuery.extend( jQuery.easing,
                 }
                 if(typeof options.callback.img_ready == 'function' || options.cycle) {
                     // gestion de l'initialisation du slider (en attendant le chargement de toutes les images avant d'appeler la fonction img_ready
-                    // également utile pour le mode cycle, permettant de générer les clones à la fin de l'initialisation du slider
+                    // ï¿½galement utile pour le mode cycle, permettant de gï¿½nï¿½rer les clones ï¿½ la fin de l'initialisation du slider
                     (function() {
                         var ready = false;
                         var tab_img_load = new Array();
                         var loadImg = function() {
                             if (tab_img_load.length == $slides.length && !ready) {
-                                ready = true; // permet de passer qu'une seule fois dans la génération des clones
+                                ready = true; // permet de passer qu'une seule fois dans la gï¿½nï¿½ration des clones
                                 if (options.cycle) {
                                     var value_class = '';
-                                    // génération des clones
+                                    // gï¿½nï¿½ration des clones
                                     methods['resizeUl'].call($this);
                                     var ul_width = $ul.width();
                                     $slides.each(function(){
@@ -242,7 +242,7 @@ jQuery.extend( jQuery.easing,
                                 }
 
                                 if (typeof options.callback.img_ready == 'function') {
-                                    // appel de la fonction après chargement des clones
+                                    // appel de la fonction aprï¿½s chargement des clones
                                     options.callback.img_ready(true);
                                 }
                                 return;
@@ -343,6 +343,9 @@ jQuery.extend( jQuery.easing,
                         var version_1_7_plus = true;
                     }
                 }
+
+                var touchStartPos = null;
+
                 function on_touch_start(e) {
                     var touch = e.originalEvent.touches || e.originalEvent.changedTouches;
                     mouseEvents = [{
@@ -358,6 +361,7 @@ jQuery.extend( jQuery.easing,
                     else {
                         $(document).on('touchmove', on_touch_move).on('touchend', on_touch_end);
                     }
+                    touchStartPos = touch;
                 }
                 function on_touch_move(e) {
                     var touch = e.originalEvent.touches || e.originalEvent.changedTouches;
@@ -371,7 +375,10 @@ jQuery.extend( jQuery.easing,
                             mouseEvents.shift();
                         }
                     }
-                    e.preventDefault();
+                    var sliding = Math.abs(touch[0].pageX - touchStartPos[0].pageX) > Math.abs(touch[0].pageY - touchStartPos[0].pageY);
+                    if(sliding) {
+                        e.preventDefault();
+                    }
                 }
                 function on_touch_end(e) {
                     if(!version_1_7_plus) {
@@ -385,17 +392,15 @@ jQuery.extend( jQuery.easing,
                     if ( !lastE || !curE ) {
                         return;
                     }
-                    var d = !e.pageX ? ( curE.pageX - lastE.pageX ) : ( e.pageX - lastE.pageX ),
-                        t  = Math.max(e.timeStamp - lastE.timeStamp, 1),
-                        v  = d/t;
+                    var d = !e.pageX ? ( curE.pageX - lastE.pageX ) : ( e.pageX - lastE.pageX );
 
                     if ( Math.abs(d) < 5 ) {
                         return;
                     }
                     if ( d > 0 ) {
-                        methods['previous'].call($this); // on va à gauche
+                        methods['previous'].call($this); // on va ï¿½ gauche
                     } else {
-                        methods['next'].call($this); // on va à droite
+                        methods['next'].call($this); // on va ï¿½ droite
                     }
                 }
                 /* --- */
