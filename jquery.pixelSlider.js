@@ -858,10 +858,15 @@ jQuery.extend( jQuery.easing,
                             taille_decalage = Math.abs(offset_next.left - offset_current.left);
                             if(options.animation == 'fade') {
                                 if(!options.current_z_index) {
-                                    options.current_z_index = recursive_z_index(monLi) ? recursive_z_index(monLi) : '0';
+                                    recursive_z_index(monLi,options);
+                                    options.current_z_index = options.return_recursive_z_index;
                                 }
+                                if(!options.current_z_index) {
+									options.current_z_index = 0;
+								}
+                                
                                 var old_z_index = nouveauLi.css('z-index') ? nouveauLi.css('z-index') : '0';
-                                monLi.css('position','relative');
+                                monLi.css('position','relative').css('z-index',options.current_z_index + 1);
                                 nouveauLi.css('position','relative').css('z-index',(options.current_z_index - 1)).css('margin-left','-'+(taille_decalage)+'px');
                                 var old_opacity = monLi.css('opacity');
                                 monLi.animate(
@@ -870,7 +875,7 @@ jQuery.extend( jQuery.easing,
                                     function() {
                                         nouveauLi.css('margin-left','auto').css('z-index',old_z_index);
                                         $ul.animate({marginLeft : '-='+taille_decalage},0);
-                                        monLi.css('opacity',old_opacity);
+                                        monLi.css('opacity',old_opacity).css('z-index','auto');
                                         callback_animation ($this,nouveauLi,'next');
                                     }
                                 );
@@ -911,10 +916,14 @@ jQuery.extend( jQuery.easing,
                                 nouveauLi = first_li;
                                 if(options.animation == 'fade') {
                                     if(!options.current_z_index) {
-                                        options.current_z_index = recursive_z_index(monLi) ? recursive_z_index(monLi) : '0';
-                                    }
+										recursive_z_index(monLi,options);
+										options.current_z_index = options.return_recursive_z_index;
+									}
+									if(!options.current_z_index) {
+										options.current_z_index = 0;
+									}
                                     var old_z_index = $ul.find('li:first').css('z-index') ? $ul.find('li:first').css('z-index') : '0';
-                                    monLi.css('position','relative');
+                                    monLi.css('position','relative').css('z-index',options.current_z_index + 1);
                                     $ul.find('li:last').css('position','relative').css('z-index',(options.current_z_index - 1)).css('margin-left','-'+(monLi.outerWidth())+'px');
                                     var old_opacity = monLi.css('opacity');
                                     monLi.animate(
@@ -923,7 +932,7 @@ jQuery.extend( jQuery.easing,
                                         function() {
                                             $ul.css('margin-left','0px');
                                             $ul.find('li:last').css('margin-left','auto').css('z-index',old_z_index);
-                                            monLi.css('opacity',old_opacity);
+                                            monLi.css('opacity',old_opacity).css('z-index','auto');
                                             $ul.width(width_ul);
                                             $ul.find('li:last').remove();
                                             $slides.eq(0).addClass('active');
@@ -958,8 +967,12 @@ jQuery.extend( jQuery.easing,
                             taille_decalage = Math.abs(offset_current.left - offset_next.left);
                             if(options.animation == 'fade') {
                                 if(!options.current_z_index) {
-                                    options.current_z_index = recursive_z_index(monLi) ? recursive_z_index(monLi) : '0';
+                                    recursive_z_index(monLi,options);
+                                    options.current_z_index = options.return_recursive_z_index;
                                 }
+                                if(!options.current_z_index) {
+									options.current_z_index = 0;
+								}
                                 monLi.css('position','relative').css('margin-left','-'+(taille_decalage)+'px');
                                 $ul.animate({marginLeft : '+='+taille_decalage},0);
                                 var old_opacity = monLi.css('opacity');
@@ -1006,8 +1019,9 @@ jQuery.extend( jQuery.easing,
                     }
                 }
                 $slides.removeClass('next');
+                
+                
             });
-
             function callback_animation ($this,nouveauLi,type) {
                 var options   = $this.data('pixelSlider-options');
                 if(nouveauLi.hasClass('li_clone')) {
@@ -1038,17 +1052,20 @@ jQuery.extend( jQuery.easing,
                     }
                 }
             }
-            function recursive_z_index($elem) {
-                if($elem.get(0).nodeName == 'BODY' && $elem.css('z-index') == 'auto') {
-                    return '0';
-                }
-                else if ($elem.css('z-index') != 'auto') {
-                    return $elem.css('z-index');
-                }
-                else {
-                    recursive_z_index($elem.parent());
-                }
-            }
+            
+            function recursive_z_index($elem,options) {
+				if($elem.get(0).nodeName == 'BODY' && $elem.css('z-index') == 'auto') {
+					options.return_recursive_z_index = 0;
+					return '0';
+				}
+				else if ($elem.css('z-index') != 'auto') {
+					options.return_recursive_z_index = parseInt($elem.css('z-index'));
+					return parseInt($elem.css('z-index'));
+				}
+				else {
+					recursive_z_index($elem.parent(),options);
+				}
+			}
         },
         next : function(e) {
             return this.each(function() {
