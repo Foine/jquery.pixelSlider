@@ -1089,6 +1089,7 @@ jQuery.extend( jQuery.easing,
             return this.each(function() {
                 var options   = $(this).data('pixelSlider-options');
                 if(options && parseInt(e) && !options.in_moving) {
+					clearTimeout(options.currentTimer);
                     methods['move_diapo'].call($(this),e);
                 }
             });
