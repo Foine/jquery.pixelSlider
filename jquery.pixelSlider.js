@@ -1088,7 +1088,7 @@ jQuery.extend( jQuery.easing,
         goTo : function(e) {
             return this.each(function() {
                 var options   = $(this).data('pixelSlider-options');
-                if(options && parseInt(e)) {
+                if(options && parseInt(e) && !options.in_moving) {
                     methods['move_diapo'].call($(this),e);
                 }
             });
