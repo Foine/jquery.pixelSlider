@@ -673,6 +673,7 @@ jQuery.extend( jQuery.easing,
                     $('<a href="javascript:;" class="pix_close_overlay">x</a>').appendTo('#pix_zone_overlay').css(css_close_overlay).hide();
                     $slides.each(function(){
                         if($(this).find('img').length > 0) {
+                            var $current_li = $(this);
                             if(options.lightbox_click) {
                                 var $obj_to_click = $(this).find(options.lightbox_click);
                                 if($obj_to_click.attr('href') != '' && !$obj_to_click.attr('data-hd')) {
@@ -686,6 +687,9 @@ jQuery.extend( jQuery.easing,
                                 $obj_to_click.css('cursor','progress').css('cursor','-moz-progress').css('cursor','-moz-progress');
                                 if($(this).attr('data-hd')) {
                                     var url = $(this).attr('data-hd');
+                                }
+                                else if ($current_li.attr('data-hd')) {
+                                    var url = $current_li.attr('data-hd');
                                 }
                                 else {
                                     var url = $(this).attr('src');
