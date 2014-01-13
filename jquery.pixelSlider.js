@@ -223,7 +223,7 @@ jQuery.extend( jQuery.easing,
                                     methods['resize_img_ul'].call($this,$ul.find('li:first'));
                                 }
                                 var support_touch   = ('ontouchstart' in document.documentElement);
-                                if (!support_touch) {
+                                if (!support_touch && options.auto_adjust) {
                                     $(window).bind('resize',function() {
                                         methods['reinitialise'].call($this);
                                         methods['resizeUl'].call($this);
