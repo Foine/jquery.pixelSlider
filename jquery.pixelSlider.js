@@ -506,11 +506,17 @@ jQuery.extend( jQuery.easing,
                     alt : alt_img
                 });
                 monLi.prepend(img);
+                
                 img.load(function() {
+					if (options.loader) {
+						setTimeout(function() {
+							$(options.loader).fadeOut(50);			
+						},200);
+					}
                     if (typeof options.callback.after_loading == 'function') {
                         options.callback.after_loading(true);
                     }
-                    if (options.loader) setTimeout("$('"+options.loader+"').fadeOut(50)",200);
+                    
                     methods['move_diapo'].call($this,action);
                     return false;
                 });
